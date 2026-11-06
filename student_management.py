@@ -1,214 +1,204 @@
-# Student Record Management System
-# Python Fundamentals Internship Task
+import json
+import os
 
-# Student Records using List and Dictionary
-
-students = [
-    {
-        "name": "Dass",
-        "age": 20,
-        "department": "CSE",
-        "marks": [78, 85, 72],
-        "attendance": 91
-    },
-    {
-        "name": "Chandra",
-        "age": 20,
-        "department": "CSE",
-        "marks": [65, 71, 68],
-        "attendance": 84
-    },
-    {
-        "name": "Parvathi",
-        "age": 19,
-        "department": "ECE",
-        "marks": [45, 52, 48],
-        "attendance": 72
-    }
-]
-
-PASS_MARK = 50
+FILE_NAME = "students.json"
 
 
-# 1. Calculate Average Mark
-def calculate_average(student):
-    return sum(student["marks"]) / len(student["marks"])
+def load_students():
+    if not os.path.exists(FILE_NAME):
+        return []
+
+    try:
+        with open(FILE_NAME, "r") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        print("File is empty or could not be read.")
+        return []
 
 
-# 2. Display All Students
-def display_students():
-    print("\n--- STUDENT DETAILS ---")
+def save_students():
+    try:
+        with open(FILE_NAME, "w") as file:
+            json.dump(students, file, indent=4)
+        print("Records saved successfully!")
+    except OSError:
+        print("Error saving records.")
 
+
+def get_marks():
+    while True:
+        try:
+            marks = [int(x.strip()) for x in input(
+                "Enter 3 subject marks separated by commas: "
+            ).split(",")]
+
+            if len(marks) != 3:
+                print("Please enter exactly 3 marks.")
+            elif any(mark < 0 or mark > 100 for mark in marks):
+                print("Marks must be between 0 and 100.")
+            else:
+                return marks
+        except ValueError:
+            print("Enter valid numbers.")
+
+
+def get_attendance():
+    while True:
+        try:
+            attendance = float(input("Enter attendance percentage: "))
+            if 0 <= attendance <= 100:
+                return attendance
+            print("Attendance must be between 0 and 100.")
+        except ValueError:
+            print("Enter a valid percentage.")
+
+
+def find_student(student_id):
     for student in students:
-        print("\nName:", student["name"])
-        print("Age:", student["age"])
-        print("Department:", student["department"])
-        print("Marks:", student["marks"])
-        print("Average:", round(calculate_average(student), 1))
-        print("Attendance:", str(student["attendance"]) + "%")
+        if student["id"] == student_id:
+            return student
+    return None
 
 
-# 3. Identify Pass or Fail Students
-def display_results():
-    print("\n--- STUDENT RESULTS ---")
-
-    for student in students:
-        average = calculate_average(student)
-
-        if average >= PASS_MARK:
-            result = "PASS"
-        else:
-            result = "FAIL"
-
-        print(student["name"], "-", result)
-
-
-# 4. Find Top Performing Student
-def find_top_performer():
-    top_student = max(students, key=calculate_average)
-
-    print("\n--- TOP PERFORMER ---")
-    print("Name:", top_student["name"])
-    print("Average:", round(calculate_average(top_student), 1))
-
-
-# 5. Filter Students by Attendance
-def filter_by_attendance():
-    print("\n--- ATTENDANCE BELOW 75% ---")
-
-    found = False
-
-    for student in students:
-        if student["attendance"] < 75:
-            print(student["name"], "-", str(student["attendance"]) + "%")
-            found = True
-
-    if not found:
-        print("No students found.")
-
-
-# Filter Students by Average Marks
-def filter_by_marks():
-    limit = float(input("Enter minimum average mark: "))
-
-    print("\n--- STUDENTS ABOVE THE MARK LIMIT ---")
-
-    found = False
-
-    for student in students:
-        average = calculate_average(student)
-
-        if average >= limit:
-            print(student["name"], "-", round(average, 1))
-            found = True
-
-    if not found:
-        print("No students found.")
-
-
-# 6. Display Class Summary
-def class_summary():
-    total_students = len(students)
-
-    all_marks = [
-        mark
-        for student in students
-        for mark in student["marks"]
-    ]
-
-    class_average = sum(all_marks) / len(all_marks)
-
-    print("\n--- CLASS SUMMARY ---")
-    print("Total Students:", total_students)
-    print("Average Class Mark:", round(class_average, 1))
-
-    find_top_performer()
-    filter_by_attendance()
-
-
-# Add New Student
 def add_student():
-    print("\n--- ADD NEW STUDENT ---")
+    student_id = input("Enter Student ID: ").strip()
 
-    name = input("Enter student name: ")
-    age = int(input("Enter age: "))
-    department = input("Enter department: ")
+    if not student_id:
+        print("Student ID cannot be empty.")
+        return
 
-    marks = []
+    if find_student(student_id):
+        print("Student ID already exists!")
+        return
 
-    for i in range(3):
-        mark = float(input(f"Enter mark {i + 1}: "))
-        marks.append(mark)
+    name = input("Enter Student Name: ").strip()
+    department = input("Enter Department: ").strip()
 
-    attendance = float(input("Enter attendance percentage: "))
+    if not name or not department:
+        print("Name and department cannot be empty.")
+        return
+
+    marks = get_marks()
+    attendance = get_attendance()
 
     student = {
+        "id": student_id,
         "name": name,
-        "age": age,
         "department": department,
         "marks": marks,
         "attendance": attendance
     }
 
     students.append(student)
-
+    save_students()
     print("Student added successfully!")
 
 
-# Main Menu
-def main():
+def view_students():
+    if not students:
+        print("No student records found.")
+        return
 
-    while True:
-        print("\n===== STUDENT MANAGEMENT SYSTEM =====")
-        print("1. Display All Students")
-        print("2. Calculate Average Marks")
-        print("3. Display Pass / Fail Results")
-        print("4. Find Top Performer")
-        print("5. Filter by Attendance")
-        print("6. Filter by Marks")
-        print("7. Display Class Summary")
-        print("8. Add New Student")
-        print("9. Exit")
-
-        choice = input("\nEnter your choice: ")
-
-        if choice == "1":
-            display_students()
-
-        elif choice == "2":
-            for student in students:
-                print(
-                    student["name"],
-                    "- Average:",
-                    round(calculate_average(student), 1)
-                )
-
-        elif choice == "3":
-            display_results()
-
-        elif choice == "4":
-            find_top_performer()
-
-        elif choice == "5":
-            filter_by_attendance()
-
-        elif choice == "6":
-            filter_by_marks()
-
-        elif choice == "7":
-            class_summary()
-
-        elif choice == "8":
-            add_student()
-
-        elif choice == "9":
-            print("Thank you for using Student Management System!")
-            break
-
-        else:
-            print("Invalid choice! Please try again.")
+    for student in students:
+        print("\nStudent ID:", student["id"])
+        print("Name:", student["name"])
+        print("Department:", student["department"])
+        print("Marks:", student["marks"])
+        print("Attendance:", student["attendance"], "%")
 
 
-# Run the Program
-if __name__ == "__main__":
-    main()
+def search_student():
+    student_id = input("Enter Student ID to search: ").strip()
+    student = find_student(student_id)
+
+    if student:
+        print("\nStudent Found!")
+        print(student)
+    else:
+        print("Student not found.")
+
+
+def update_student():
+    student_id = input("Enter Student ID to update: ").strip()
+    student = find_student(student_id)
+
+    if not student:
+        print("Student not found.")
+        return
+
+    print("Enter the new details:")
+    name = input("Enter new name: ").strip()
+    department = input("Enter new department: ").strip()
+
+    if name:
+        student["name"] = name
+    if department:
+        student["department"] = department
+
+    student["marks"] = get_marks()
+    student["attendance"] = get_attendance()
+
+    save_students()
+    print("Student updated successfully!")
+
+
+def delete_student():
+    student_id = input("Enter Student ID to delete: ").strip()
+    student = find_student(student_id)
+
+    if student:
+        students.remove(student)
+        save_students()
+        print("Student deleted successfully!")
+    else:
+        print("Student not found.")
+
+
+def performance_report():
+    if not students:
+        print("No records available.")
+        return
+
+    for student in students:
+        average = sum(student["marks"]) / len(student["marks"])
+        result = "PASS" if all(
+            mark >= 50 for mark in student["marks"]
+        ) else "FAIL"
+
+        print("\nName:", student["name"])
+        print("Average Marks:", round(average, 2))
+        print("Result:", result)
+
+
+students = load_students()
+
+while True:
+    print("\n===== STUDENT RECORD MANAGEMENT =====")
+    print("1. Add Student")
+    print("2. View Students")
+    print("3. Search Student")
+    print("4. Update Student")
+    print("5. Delete Student")
+    print("6. Performance Report")
+    print("7. Exit")
+
+    choice = input("Choose an option: ")
+
+    if choice == "1":
+        add_student()
+    elif choice == "2":
+        view_students()
+    elif choice == "3":
+        search_student()
+    elif choice == "4":
+        update_student()
+    elif choice == "5":
+        delete_student()
+    elif choice == "6":
+        performance_report()
+    elif choice == "7":
+        save_students()
+        print("Thank you!")
+        break
+    else:
+        print("Invalid choice. Try again.")
