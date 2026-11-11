@@ -1,0 +1,31 @@
+{
+    "donations": [
+        {
+            "id": "DON001",
+            "food": "Vegetable Rice",
+            "quantity": "20 Meals",
+            "location": "Chennai",
+            "available_until": "8:00 PM",
+            "contact": "9876543210",
+            "status": "Delivered",
+            "volunteer": "USR002",
+            "created_at": "2026-11-11T20:59:06.161921"
+        }
+    ],
+    "users": [
+        {
+            "id": "USR001",
+            "name": "Arun",
+            "role": "Donor",
+            "phone": "9876543210",
+            "location": "Chennai"
+        },
+        {
+            "id": "USR002",
+            "name": "Kumar",
+            "role": "Volunteer",
+            "phone": "9876543211",
+            "location": "Chennai"
+        }
+    ]
+}
